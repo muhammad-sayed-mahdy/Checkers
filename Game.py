@@ -1,0 +1,127 @@
+import tkinter as tk
+from PIL import ImageTk, Image
+from Checkers import Checkers
+
+window = tk.Tk()
+window.title("Checkers")
+IMG_SIZE = 50
+black_man = ImageTk.PhotoImage(Image.open('assets/black_man.png').resize((IMG_SIZE, IMG_SIZE)))
+black_king = ImageTk.PhotoImage(Image.open('assets/black_king.png').resize((IMG_SIZE, IMG_SIZE)))
+white_man = ImageTk.PhotoImage(Image.open('assets/white_man.png').resize((IMG_SIZE, IMG_SIZE)))
+white_king = ImageTk.PhotoImage(Image.open('assets/white_king.png').resize((IMG_SIZE, IMG_SIZE)))
+blank_white = ImageTk.PhotoImage(Image.open('assets/blank_white.png').resize((IMG_SIZE, IMG_SIZE)))
+blank_black = ImageTk.PhotoImage(Image.open('assets/blank_black.png').resize((IMG_SIZE, IMG_SIZE)))
+
+MAX_DEPTH = 4
+
+class GUI:
+    
+    def __init__(self) -> None:
+        super().__init__()
+        self.game = Checkers()
+        
+        self.player = Checkers.BLACK
+        if self.player == Checkers.WHITE:
+            self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=Checkers.evaluate2, enablePrint=False)
+        
+        self.lastX = None
+        self.lastY = None
+        self.moves = None
+        self.cnt = 0
+        self.btn = [[None]*self.game.size for _ in range(self.game.size)]
+        for i in range(self.game.size):
+            window.columnconfigure(i, weight=1, minsize=IMG_SIZE)
+            window.rowconfigure(i, weight=1, minsize=IMG_SIZE)
+
+            for j in range(self.game.size):
+                frame = tk.Frame(master=window)
+                frame.grid(row=i, column=j, sticky="nsew")
+
+                self.btn[i][j] = tk.Button(master=frame, width=IMG_SIZE, height=IMG_SIZE)
+                self.btn[i][j].bind("<Button-1>", self.click)
+                self.btn[i][j].pack(expand=True)
+                
+        self.update()
+        window.mainloop()
+
+    def update(self):
+        for i in range(self.game.size):
+            f = i % 2 == 1
+            for j in range(self.game.size):
+
+                if f:
+                    img = blank_black
+                else:
+                    img = blank_white
+                if self.game.board[i][j] == Checkers.BLACK_MAN:
+                    img = black_man
+                elif self.game.board[i][j] == Checkers.BLACK_KING:
+                    img = black_king
+                elif self.game.board[i][j] == Checkers.WHITE_MAN:
+                    img = white_man
+                elif self.game.board[i][j] == Checkers.WHITE_KING:
+                    img = white_king
+
+                self.btn[i][j]["image"] = img
+                
+                f = not f
+
+    def click(self, event):
+        info = event.widget.master.grid_info()
+        x, y = info["row"], info["column"]
+        if self.lastX == None or self.lastY == None:
+            moves = self.moves
+            if moves == None:
+                moves = self.game.nextMoves(self.player)
+            if len(moves) == 0:
+                print("Lose")
+                window.destroy()
+                return
+            found = False
+            for move in moves:
+                if (x,y) == move[0]:
+                    found = True
+                    break
+            if found:
+                self.lastX = x
+                self.lastY = y
+            else:
+                print("Invalid position")
+            return
+        normalPositions, capturePositions = self.game.nextPositions(self.lastX, self.lastY)
+        positions = normalPositions if (len(capturePositions) == 0) else capturePositions
+        if (x,y) not in positions:
+            print("invalid move")
+            self.lastX = None
+            self.lastY = None
+            return
+
+        canCapture, removed, _ = self.game.playMove(self.lastX, self.lastY, x, y)
+        self.update()
+        self.cnt += 1
+        self.lastX = None
+        self.lastY = None
+        if removed != 0:
+            self.cnt = 0
+        if canCapture:
+            _, nextCaptures = self.game.nextPositions(x, y)
+            if len(nextCaptures) != 0:
+                self.moves = [((x, y), nextCaptures)]
+                return
+
+        self.moves = None
+        cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=Checkers.evaluate2, enablePrint=False)
+        self.cnt += 1
+        if not cont:
+            print("WIN")
+            window.destroy()
+            return
+        self.update()
+        if reset:
+            self.cnt = 0
+        if self.cnt == 100:
+            print("Draw")
+            window.destroy()
+            return
+
+GUI()
