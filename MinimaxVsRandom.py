@@ -2,7 +2,7 @@ from Checkers import Checkers
 
 wins = 0
 draws = 0
-games = 1
+games = 1000
 START_PLAYER = Checkers.BLACK
 
 for i in range(games):
@@ -23,8 +23,12 @@ for i in range(games):
         #     print("state repeated 3 times")
         #     break
 
+        evaluate = Checkers.evaluate2
+        if cnt > 25:
+            evaluate = Checkers.sumDistances
+
         if player == START_PLAYER:
-            cont, reset = game.minimaxPlay(player, maxDepth=2, evaluate=Checkers.evaluate2, enablePrint=False)
+            cont, reset = game.minimaxPlay(player, maxDepth=2, evaluate=evaluate, enablePrint=False)
             if not cont:
                 break
         else:

@@ -1,10 +1,10 @@
 import tkinter as tk
 from PIL import ImageTk, Image
-from Checkers import Checkers
+from Checkers import Checkers, Positions
 
 window = tk.Tk()
 window.title("Checkers")
-IMG_SIZE = 50
+IMG_SIZE = 75
 black_man = ImageTk.PhotoImage(Image.open('assets/black_man.png').resize((IMG_SIZE, IMG_SIZE)))
 black_king = ImageTk.PhotoImage(Image.open('assets/black_king.png').resize((IMG_SIZE, IMG_SIZE)))
 white_man = ImageTk.PhotoImage(Image.open('assets/white_man.png').resize((IMG_SIZE, IMG_SIZE)))
@@ -12,7 +12,7 @@ white_king = ImageTk.PhotoImage(Image.open('assets/white_king.png').resize((IMG_
 blank_white = ImageTk.PhotoImage(Image.open('assets/blank_white.png').resize((IMG_SIZE, IMG_SIZE)))
 blank_black = ImageTk.PhotoImage(Image.open('assets/blank_black.png').resize((IMG_SIZE, IMG_SIZE)))
 
-MAX_DEPTH = 4
+MAX_DEPTH = 5
 
 class GUI:
     
@@ -26,7 +26,7 @@ class GUI:
         
         self.lastX = None
         self.lastY = None
-        self.moves = None
+        self.willCapture = False
         self.cnt = 0
         self.btn = [[None]*self.game.size for _ in range(self.game.size)]
         for i in range(self.game.size):
@@ -42,6 +42,8 @@ class GUI:
                 self.btn[i][j].pack(expand=True)
                 
         self.update()
+        nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
+        self.highlight(nextPositions)
         window.mainloop()
 
     def update(self):
@@ -65,35 +67,43 @@ class GUI:
                 self.btn[i][j]["image"] = img
                 
                 f = not f
+    
+    def highlight(self, positions: Positions):
+        defaultbg = window.cget('bg')
+        for x in range(self.game.size):
+            for y in range(self.game.size):
+                self.btn[x][y].config(highlightbackground=defaultbg, highlightthickness=3)
+
+        for position in positions:
+            x, y = position
+            self.btn[x][y].config(highlightbackground="yellow", highlightthickness=3)
 
     def click(self, event):
         info = event.widget.master.grid_info()
         x, y = info["row"], info["column"]
         if self.lastX == None or self.lastY == None:
-            moves = self.moves
-            if moves == None:
-                moves = self.game.nextMoves(self.player)
-            if len(moves) == 0:
-                print("Lose")
-                window.destroy()
-                return
-            found = False
-            for move in moves:
-                if (x,y) == move[0]:
-                    found = True
-                    break
+            moves = self.game.nextMoves(self.player)
+            found = (x, y) in [move[0] for move in moves]
+            
             if found:
                 self.lastX = x
                 self.lastY = y
+                normal, capture = self.game.nextPositions(x, y)
+                positions = normal if len(capture) == 0 else capture
+                self.highlight(positions)
             else:
                 print("Invalid position")
             return
+
         normalPositions, capturePositions = self.game.nextPositions(self.lastX, self.lastY)
         positions = normalPositions if (len(capturePositions) == 0) else capturePositions
         if (x,y) not in positions:
             print("invalid move")
-            self.lastX = None
-            self.lastY = None
+            if not self.willCapture:
+                self.lastX = None
+                self.lastY = None
+                nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
+                self.highlight(nextPositions)
             return
 
         canCapture, removed, _ = self.game.playMove(self.lastX, self.lastY, x, y)
@@ -101,15 +111,19 @@ class GUI:
         self.cnt += 1
         self.lastX = None
         self.lastY = None
+        self.willCapture = False
+
         if removed != 0:
             self.cnt = 0
         if canCapture:
             _, nextCaptures = self.game.nextPositions(x, y)
             if len(nextCaptures) != 0:
-                self.moves = [((x, y), nextCaptures)]
+                self.willCapture = True
+                self.lastX = x
+                self.lastY = y
+                self.highlight(nextCaptures)
                 return
 
-        self.moves = None
         cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=Checkers.evaluate2, enablePrint=False)
         self.cnt += 1
         if not cont:
@@ -123,5 +137,11 @@ class GUI:
             print("Draw")
             window.destroy()
             return
+        
+        nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
+        self.highlight(nextPositions)
+        if len(nextPositions) == 0:
+            print("Lose")
+            window.destroy()
 
 GUI()

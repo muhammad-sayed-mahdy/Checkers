@@ -292,7 +292,8 @@ class Checkers(object):
         Returns:
             int: score of the board
         """
-        score = 0
+        score1 = 0
+        score2 = 0
         maxPieces = 0
         minPieces = 0
         for i in range(self.size):
@@ -300,17 +301,19 @@ class Checkers(object):
                 if self.board[i][j] != 0:
                     if self.board[i][j] % 2 == maximizer:
                         maxPieces += 1
+                        score1 += (self.board[i][j] + 1) // 2
                         for x in range(self.size):
                             for y in range(self.size):
                                 if self.board[x][y] != 0 and self.board[x][y] % 2 != maximizer:
-                                    score += abs(x-i) + abs(y-j)
+                                    score2 += abs(x-i) + abs(y-j)
                     else:
                         minPieces += 1
+                        score1 -= (self.board[i][j] + 1) // 2
                         
         if maxPieces > minPieces:   #come closer to opponent
-            return -score
+            return score1*1000 - score2
         else:    # run away
-            return score
+            return score1*1000 + score2
 
     def evaluate2(self, maximizer: int) -> int:
         """evaluate the current state of the board
