@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from PIL import ImageTk, Image
 from Checkers import Checkers, Positions
 
@@ -123,25 +124,27 @@ class GUI:
                 self.lastY = y
                 self.highlight(nextCaptures)
                 return
-
-        cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=Checkers.evaluate2, enablePrint=False)
+        evaluate = Checkers.evaluate2
+        if self.cnt > 25:
+            evaluate = Checkers.sumDistances
+        cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=evaluate, enablePrint=False)
         self.cnt += 1
         if not cont:
-            print("WIN")
+            messagebox.showinfo(message="You Won!", title="Checkers")
             window.destroy()
             return
         self.update()
         if reset:
             self.cnt = 0
         if self.cnt == 100:
-            print("Draw")
+            messagebox.showinfo(message="Draw!", title="Checkers")
             window.destroy()
             return
         
         nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
         self.highlight(nextPositions)
         if len(nextPositions) == 0:
-            print("Lose")
+            messagebox.showinfo(message="You lost!", title="Checkers")
             window.destroy()
 
 GUI()

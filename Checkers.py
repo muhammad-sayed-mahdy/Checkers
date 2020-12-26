@@ -137,7 +137,7 @@ class Checkers(object):
             player (int): the type of player (WHITE, BLACK)
 
         Returns:
-            list: valid moves for the player
+            Moves: valid moves for the player
         """
         captureMoves = []
         normalMoves = []
@@ -398,7 +398,7 @@ class Checkers(object):
         if moves == None:
             moves = self.nextMoves(player)
         if len(moves) == 0 or depth == maxDepth:
-            score = evaluate(self, maximizer) - depth
+            score = evaluate(self, maximizer)
             return score
 
         bestValue = -self.OO
