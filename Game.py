@@ -45,6 +45,8 @@ class GUI:
         self.update()
         nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
         self.highlight(nextPositions)
+        totalSize = IMG_SIZE*self.game.size
+        window.geometry(f"{totalSize}x{totalSize}")
         window.mainloop()
 
     def update(self):
@@ -73,11 +75,11 @@ class GUI:
         defaultbg = window.cget('bg')
         for x in range(self.game.size):
             for y in range(self.game.size):
-                self.btn[x][y].config(highlightbackground=defaultbg, highlightthickness=3)
+                self.btn[x][y].master.config(highlightbackground=defaultbg, highlightthickness=3)
 
         for position in positions:
             x, y = position
-            self.btn[x][y].config(highlightbackground="yellow", highlightthickness=3)
+            self.btn[x][y].master.config(highlightbackground="yellow", highlightthickness=3)
 
     def click(self, event):
         info = event.widget.master.grid_info()

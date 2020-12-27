@@ -8,7 +8,7 @@ and different evaluation functions
 ## How to run
 You must have python3 installed.  
 just type in the terminal `python Game.py` to run the game.  
-it's cross-platform
+it's cross-platform, and tested on both ubuntu and windows
 
 ## Files Structure
 1. `Checkers.py` contains all the functionalities of the checkers game such as move generators,  
