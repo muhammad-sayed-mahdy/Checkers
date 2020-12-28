@@ -2,10 +2,11 @@ import tkinter as tk
 from tkinter import messagebox
 from PIL import ImageTk, Image
 from Checkers import Checkers, Positions
+from enum import Enum
 
 window = tk.Tk()
 window.title("Checkers")
-IMG_SIZE = 75
+IMG_SIZE = 60
 black_man = ImageTk.PhotoImage(Image.open('assets/black_man.png').resize((IMG_SIZE, IMG_SIZE)))
 black_king = ImageTk.PhotoImage(Image.open('assets/black_king.png').resize((IMG_SIZE, IMG_SIZE)))
 white_man = ImageTk.PhotoImage(Image.open('assets/white_man.png').resize((IMG_SIZE, IMG_SIZE)))
@@ -13,17 +14,32 @@ white_king = ImageTk.PhotoImage(Image.open('assets/white_king.png').resize((IMG_
 blank_white = ImageTk.PhotoImage(Image.open('assets/blank_white.png').resize((IMG_SIZE, IMG_SIZE)))
 blank_black = ImageTk.PhotoImage(Image.open('assets/blank_black.png').resize((IMG_SIZE, IMG_SIZE)))
 
+class Mode(Enum):
+    SINGLE_PLAYER = 0
+    MULTIPLE_PLAYER = 1
+class Algorithm(Enum):
+    MINIMAX = 0
+    RANDOM = 1
+
+CHECKER_SIZE = 8
+GAME_MODE = Mode.SINGLE_PLAYER
+STARTING_PLAYER = Checkers.BLACK
+USED_ALGORITHM = Algorithm.MINIMAX
 MAX_DEPTH = 5
+EVALUATION_FUNCTION = Checkers.evaluate2
 
 class GUI:
     
     def __init__(self) -> None:
         super().__init__()
-        self.game = Checkers()
+        self.game = Checkers(CHECKER_SIZE)
         
-        self.player = Checkers.BLACK
-        if self.player == Checkers.WHITE:
-            self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=Checkers.evaluate2, enablePrint=False)
+        self.player = STARTING_PLAYER
+        if self.player == Checkers.WHITE and GAME_MODE == Mode.SINGLE_PLAYER:
+            if USED_ALGORITHM == Algorithm.MINIMAX:
+                self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=EVALUATION_FUNCTION, enablePrint=False)
+            elif USED_ALGORITHM == Algorithm.RANDOM:
+                self.game.randomPlay(1-self.player, enablePrint=False)
         
         self.lastX = None
         self.lastY = None
@@ -45,8 +61,6 @@ class GUI:
         self.update()
         nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
         self.highlight(nextPositions)
-        totalSize = IMG_SIZE*self.game.size
-        window.geometry(f"{totalSize}x{totalSize}")
         window.mainloop()
 
     def update(self):
@@ -126,18 +140,27 @@ class GUI:
                 self.lastY = y
                 self.highlight(nextCaptures)
                 return
-        evaluate = Checkers.evaluate2
-        if self.cnt > 25:
-            evaluate = Checkers.sumDistances
-        cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=evaluate, enablePrint=False)
-        self.cnt += 1
-        if not cont:
-            messagebox.showinfo(message="You Won!", title="Checkers")
-            window.destroy()
-            return
-        self.update()
-        if reset:
-            self.cnt = 0
+
+        if GAME_MODE == Mode.SINGLE_PLAYER:
+            cont, reset = True, False
+            if USED_ALGORITHM == Algorithm.MINIMAX:
+                evaluate = EVALUATION_FUNCTION
+                if self.cnt > 25:
+                    evaluate = Checkers.sumDistances
+                cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=evaluate, enablePrint=False)
+            elif USED_ALGORITHM == Algorithm.RANDOM:
+                cont, reset = self.game.randomPlay(1-self.player, enablePrint=False)
+            self.cnt += 1
+            if not cont:
+                messagebox.showinfo(message="You Won!", title="Checkers")
+                window.destroy()
+                return
+            self.update()
+            if reset:
+                self.cnt = 0
+        else:
+            self.player = 1-self.player
+
         if self.cnt == 100:
             messagebox.showinfo(message="Draw!", title="Checkers")
             window.destroy()
@@ -146,7 +169,11 @@ class GUI:
         nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
         self.highlight(nextPositions)
         if len(nextPositions) == 0:
-            messagebox.showinfo(message="You lost!", title="Checkers")
+            if GAME_MODE == Mode.SINGLE_PLAYER:
+                messagebox.showinfo(message="You lost!", title="Checkers")
+            else:
+                winner = "BLACK" if self.player == Checkers.WHITE else "WHITE"
+                messagebox.showinfo(message=f"{winner} Player won!", title="Checkers")
             window.destroy()
 
 GUI()

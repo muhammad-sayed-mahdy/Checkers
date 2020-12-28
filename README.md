@@ -20,4 +20,13 @@ it's cross-platform, and tested on both ubuntu and windows
 4. `MinimaxVsRandom.py` contains code to run minimax agent against random playing agent.  
    It's for the same purpose as `MinimaxVsMinimax.py`
 
-Refer to [Report](Checkers%20Report.pdf) for more information about experiment and results
+Refer to the [Report](Checkers%20Report.pdf) for more information about experiment and results
+
+## Configuration
+1. You can change the size of the checkers instead of the default 8*8 to any even number greater than 3.
+2. You can change the mode of the game, it can be either `Mode.MULTIPLE_PLAYER` or `Mode.SINGLE_PLAYER`
+3. You can change the starting player in `Game.py` it can be either `Checkers.BLACK` or `Checkers.WHITE`
+4. You can change the algorithm used to play a computer move, it can be either `Algorithm.MINIMAX` or `Algorithm.RANDOM`.
+### Minimax configuraiton
+1. You can change the `maxDepth`, the higher the max depth the harder the level of play and the more time it takes to compute the play.
+2. You can change the evaluation function, it can be either `Checkers.evaluate1`, `Checkers.evaluate2` or `Checkers.sumDistances`
