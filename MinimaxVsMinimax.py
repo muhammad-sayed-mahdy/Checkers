@@ -2,7 +2,7 @@ from Checkers import Checkers
 
 wins = 0
 draws = 0
-games = 1
+games = 200
 START_PLAYER = Checkers.BLACK
 
 for i in range(games):
@@ -21,13 +21,17 @@ for i in range(games):
         # if statesCounter[state] == 3:
         #     print("state repeated 3 times")
         #     break
+        evaluator1 = Checkers.evaluate1
+        evaluator2 = Checkers.evaluate2
+        if cnt > 25:
+            evaluator1 = evaluator2 = Checkers.sumDistances
 
         if player == START_PLAYER:
-            cont, reset = game.minimaxPlay(player, maxDepth=2, evaluate=Checkers.evaluate2, enablePrint=True)
+            cont, reset = game.minimaxPlay(player, maxDepth=3, evaluate=evaluator1, enablePrint=False)
             if not cont:
                 break
         else:
-            cont, reset = game.minimaxPlay(player, maxDepth=1, evaluate=Checkers.evaluate1, enablePrint=True)
+            cont, reset = game.minimaxPlay(player, maxDepth=3, evaluate=evaluator2, enablePrint=False)
             if not cont:
                 break
 
@@ -41,12 +45,13 @@ for i in range(games):
     #     draws += 1
 
     if cnt == 100:
-        print("Draw")
+        # print("Draw")
         draws += 1
     else:
-        print (("WHITE" if player == Checkers.BLACK else "BLACK") + " Player wins")
+        # print (("WHITE" if player == Checkers.BLACK else "BLACK") + " Player wins")
         if player != START_PLAYER:
             wins += 1
     print(i, end='\r')
 
-print(f"total wins of {wins}/{games} and draws of {draws}/{games}")
+loses = games - wins - draws
+print(f"total wins of {wins}/{games}, draws of {draws}/{games} and loses of {loses}/{games}")

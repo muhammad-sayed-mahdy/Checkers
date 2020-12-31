@@ -43,7 +43,7 @@ class Checkers(object):
                 piece = 0
             elif i == size / 2 + 1:
                 piece = self.BLACK_MAN
-            for j in range(size):
+            for _ in range(size):
                 if f:
                     l.append(piece)
                 else:
@@ -73,7 +73,7 @@ class Checkers(object):
             print()
 
     def encodeBoard(self) -> int:
-        """Encode the game board so that it can be represented by a single integer
+        """Encode the game board so that each state can be represented by a single unique integer
 
         Returns:
             int: the value of the encoded game board
@@ -81,7 +81,9 @@ class Checkers(object):
         value = 0
         for i in range(self.size):
             for j in range(self.size):
-                num = i * self.size + j
+                # make the minimum value = 5, 
+                # so that it's greater than greatest value of the board (4)
+                num = i * self.size + j + 5
                 value += num * self.board[i][j]
         return value
 
@@ -270,7 +272,7 @@ class Checkers(object):
         Returns:
             int: score of the board
         """
-        # score = (2*white_kings+white_men - (2*black_kings + black_men))*5
+        # score = (2*maximizer_kings+maximizer_men - (2*opponent_kings + opponent_men))*5
         
         score = 0
         for i in range(self.size):
@@ -366,7 +368,7 @@ class Checkers(object):
                     else:
                         protected += sign*1
                 
-        return men*500 + kings*775 + backRow*400 + middleBox*250 + middleRow*50 - 300*vulnerable + 300*protected
+        return men*2000 + kings*4000 + backRow*400 + middleBox*250 + middleRow*50 - 300*vulnerable + 300*protected
 
     def minimax(
         self,
@@ -405,6 +407,8 @@ class Checkers(object):
         if player != maximizer:
             bestValue = self.OO
 
+        # sort moves by the minimum next positions
+        moves.sort(key=lambda move: len(move[1]))
         for position in moves:
             x, y = position[0]
             for nx, ny in position[1]:
