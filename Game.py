@@ -33,25 +33,31 @@ class GUI:
     def __init__(self) -> None:
         super().__init__()
         self.game = Checkers(CHECKER_SIZE)
-        
+        self.history = [self.game.getBoard()]
+        self.historyPtr = 0
+
         self.player = STARTING_PLAYER
         if self.player == Checkers.WHITE and GAME_MODE == Mode.SINGLE_PLAYER:
             if USED_ALGORITHM == Algorithm.MINIMAX:
                 self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=EVALUATION_FUNCTION, enablePrint=False)
             elif USED_ALGORITHM == Algorithm.RANDOM:
                 self.game.randomPlay(1-self.player, enablePrint=False)
+            self.history = [self.game.getBoard()]
         
         self.lastX = None
         self.lastY = None
         self.willCapture = False
         self.cnt = 0
         self.btn = [[None]*self.game.size for _ in range(self.game.size)]
+
+        board = tk.Frame(master=window)
+        board.pack()
         for i in range(self.game.size):
-            window.columnconfigure(i, weight=1, minsize=IMG_SIZE)
-            window.rowconfigure(i, weight=1, minsize=IMG_SIZE)
+            board.columnconfigure(i, weight=1, minsize=IMG_SIZE)
+            board.rowconfigure(i, weight=1, minsize=IMG_SIZE)
 
             for j in range(self.game.size):
-                frame = tk.Frame(master=window)
+                frame = tk.Frame(master=board)
                 frame.grid(row=i, column=j, sticky="nsew")
 
                 self.btn[i][j] = tk.Button(master=frame, width=IMG_SIZE, height=IMG_SIZE)
@@ -61,6 +67,15 @@ class GUI:
         self.update()
         nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
         self.highlight(nextPositions)
+
+        options = tk.Frame(master=window)
+        options.pack()
+        btn_undo = tk.Button(master=options, command=self.undo, text="Undo")
+        btn_undo.pack(side=tk.LEFT)
+
+        btn_redo = tk.Button(master=options, command=self.redo, text="Redo")
+        btn_redo.pack(side=tk.RIGHT)
+
         window.mainloop()
 
     def update(self):
@@ -175,5 +190,33 @@ class GUI:
                 winner = "BLACK" if self.player == Checkers.WHITE else "WHITE"
                 messagebox.showinfo(message=f"{winner} Player won!", title="Checkers")
             window.destroy()
+
+        self.history = self.history[:self.historyPtr+1]
+        self.history.append(self.game.getBoard())
+        self.historyPtr += 1
+
+    def undo(self):
+        if self.historyPtr > 0 and not self.willCapture:
+            self.historyPtr -= 1
+            self.game.setBoard(self.history[self.historyPtr])
+            self.update()
+
+            self.lastX = self.lastY = None
+            nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
+            self.highlight(nextPositions)
+        else:
+            print("Can't undo")
+    
+    def redo(self):
+        if self.historyPtr < len(self.history)-1 and not self.willCapture:
+            self.historyPtr += 1
+            self.game.setBoard(self.history[self.historyPtr])
+            self.update()
+
+            self.lastX = self.lastY = None
+            nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
+            self.highlight(nextPositions)
+        else:
+            print("Can't redo")
 
 GUI()

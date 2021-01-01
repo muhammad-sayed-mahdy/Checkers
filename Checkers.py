@@ -1,5 +1,6 @@
 import random
 from typing import Callable, List, Tuple
+from copy import deepcopy
 
 Board = List[List[int]]
 Position = Tuple[int, int]
@@ -86,6 +87,22 @@ class Checkers(object):
                 num = i * self.size + j + 5
                 value += num * self.board[i][j]
         return value
+
+    def getBoard(self):
+        """Get Game board
+
+        Returns:
+            Board: game board
+        """
+        return deepcopy(self.board)
+
+    def setBoard(self, board: Board):
+        """Set game board
+
+        Args:
+            board (Board): board to set the game borad to
+        """
+        self.board = deepcopy(board)
 
     def isValid(self, x: int, y: int) -> bool:
         """Check if the given position is inside the board
