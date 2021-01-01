@@ -53,4 +53,5 @@ for i in range(games):
             wins += 1
     print(i, end='\r')
 
-print(f"total wins of {wins}/{games} and draws of {draws}/{games}")
+loses = games - wins - draws
+print(f"total wins of {wins}/{games}, draws of {draws}/{games} and loses of {loses}/{games}")
