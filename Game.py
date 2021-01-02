@@ -50,14 +50,14 @@ class GUI:
         self.cnt = 0
         self.btn = [[None]*self.game.size for _ in range(self.game.size)]
 
-        board = tk.Frame(master=window)
-        board.pack()
+        frm_board = tk.Frame(master=window)
+        frm_board.pack(fill=tk.BOTH, expand=True)
         for i in range(self.game.size):
-            board.columnconfigure(i, weight=1, minsize=IMG_SIZE)
-            board.rowconfigure(i, weight=1, minsize=IMG_SIZE)
+            frm_board.columnconfigure(i, weight=1, minsize=IMG_SIZE)
+            frm_board.rowconfigure(i, weight=1, minsize=IMG_SIZE)
 
             for j in range(self.game.size):
-                frame = tk.Frame(master=board)
+                frame = tk.Frame(master=frm_board)
                 frame.grid(row=i, column=j, sticky="nsew")
 
                 self.btn[i][j] = tk.Button(master=frame, width=IMG_SIZE, height=IMG_SIZE)
@@ -68,13 +68,13 @@ class GUI:
         nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
         self.highlight(nextPositions)
 
-        options = tk.Frame(master=window)
-        options.pack()
-        btn_undo = tk.Button(master=options, command=self.undo, text="Undo")
-        btn_undo.pack(side=tk.LEFT)
+        frm_options = tk.Frame(master=window)
+        frm_options.pack(expand=True)
+        btn_undo = tk.Button(master=frm_options, command=self.undo, text="Undo")
+        btn_undo.pack(side=tk.LEFT, padx=5, pady=5)
 
-        btn_redo = tk.Button(master=options, command=self.redo, text="Redo")
-        btn_redo.pack(side=tk.RIGHT)
+        btn_redo = tk.Button(master=frm_options, command=self.redo, text="Redo")
+        btn_redo.pack(side=tk.LEFT, padx=5, pady=5)
 
         window.mainloop()
 
