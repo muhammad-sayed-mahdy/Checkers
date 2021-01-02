@@ -28,6 +28,12 @@ USED_ALGORITHM = Algorithm.MINIMAX
 MAX_DEPTH = 5
 EVALUATION_FUNCTION = Checkers.evaluate2
 
+def from_rgb(rgb):
+    """translates an rgb tuple of int to a tkinter friendly color code
+    """
+    r, g, b = rgb
+    return f'#{r:02x}{g:02x}{b:02x}'
+
 class GUI:
     
     def __init__(self) -> None:
@@ -60,9 +66,9 @@ class GUI:
                 frame = tk.Frame(master=frm_board)
                 frame.grid(row=i, column=j, sticky="nsew")
 
-                self.btn[i][j] = tk.Button(master=frame, width=IMG_SIZE, height=IMG_SIZE)
+                self.btn[i][j] = tk.Button(master=frame, width=IMG_SIZE, height=IMG_SIZE, relief=tk.FLAT)
                 self.btn[i][j].bind("<Button-1>", self.click)
-                self.btn[i][j].pack(expand=True)
+                self.btn[i][j].pack(expand=True, fill=tk.BOTH)
                 
         self.update()
         nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
@@ -85,8 +91,10 @@ class GUI:
 
                 if f:
                     img = blank_black
+                    self.btn[i][j]['bg'] = from_rgb((39, 39, 39))
                 else:
                     img = blank_white
+                    self.btn[i][j]['bg'] = 'white'
                 if self.game.board[i][j] == Checkers.BLACK_MAN:
                     img = black_man
                 elif self.game.board[i][j] == Checkers.BLACK_KING:
@@ -101,9 +109,9 @@ class GUI:
                 f = not f
     
     def highlight(self, positions: Positions):
-        defaultbg = window.cget('bg')
         for x in range(self.game.size):
             for y in range(self.game.size):
+                defaultbg = self.btn[x][y].cget('bg')
                 self.btn[x][y].master.config(highlightbackground=defaultbg, highlightthickness=3)
 
         for position in positions:
