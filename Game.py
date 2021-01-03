@@ -7,12 +7,11 @@ from enum import Enum
 window = tk.Tk()
 window.title("Checkers")
 IMG_SIZE = 60
-black_man = ImageTk.PhotoImage(Image.open('assets/black_man.png').resize((IMG_SIZE, IMG_SIZE)))
-black_king = ImageTk.PhotoImage(Image.open('assets/black_king.png').resize((IMG_SIZE, IMG_SIZE)))
-white_man = ImageTk.PhotoImage(Image.open('assets/white_man.png').resize((IMG_SIZE, IMG_SIZE)))
-white_king = ImageTk.PhotoImage(Image.open('assets/white_king.png').resize((IMG_SIZE, IMG_SIZE)))
-blank_white = ImageTk.PhotoImage(Image.open('assets/blank_white.png').resize((IMG_SIZE, IMG_SIZE)))
-blank_black = ImageTk.PhotoImage(Image.open('assets/blank_black.png').resize((IMG_SIZE, IMG_SIZE)))
+black_man_img = ImageTk.PhotoImage(Image.open('assets/black_man.png').resize((IMG_SIZE, IMG_SIZE)))
+black_king_img = ImageTk.PhotoImage(Image.open('assets/black_king.png').resize((IMG_SIZE, IMG_SIZE)))
+white_man_img = ImageTk.PhotoImage(Image.open('assets/white_man.png').resize((IMG_SIZE, IMG_SIZE)))
+white_king_img = ImageTk.PhotoImage(Image.open('assets/white_king.png').resize((IMG_SIZE, IMG_SIZE)))
+blank_img = ImageTk.PhotoImage(Image.open('assets/blank.png').resize((IMG_SIZE, IMG_SIZE)))
 
 class Mode(Enum):
     SINGLE_PLAYER = 0
@@ -90,19 +89,18 @@ class GUI:
             for j in range(self.game.size):
 
                 if f:
-                    img = blank_black
-                    self.btn[i][j]['bg'] = from_rgb((39, 39, 39))
+                    self.btn[i][j]['bg'] = 'gray25'
                 else:
-                    img = blank_white
                     self.btn[i][j]['bg'] = 'white'
+                img = blank_img
                 if self.game.board[i][j] == Checkers.BLACK_MAN:
-                    img = black_man
+                    img = black_man_img
                 elif self.game.board[i][j] == Checkers.BLACK_KING:
-                    img = black_king
+                    img = black_king_img
                 elif self.game.board[i][j] == Checkers.WHITE_MAN:
-                    img = white_man
+                    img = white_man_img
                 elif self.game.board[i][j] == Checkers.WHITE_KING:
-                    img = white_king
+                    img = white_king_img
 
                 self.btn[i][j]["image"] = img
                 
