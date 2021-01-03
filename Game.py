@@ -107,6 +107,7 @@ class GUI:
                 self.btn[i][j]["image"] = img
                 
                 f = not f
+        window.update()
     
     def highlight(self, positions: Positions):
         for x in range(self.game.size):
@@ -147,6 +148,7 @@ class GUI:
             return
 
         canCapture, removed, _ = self.game.playMove(self.lastX, self.lastY, x, y)
+        self.highlight([])
         self.update()
         self.cnt += 1
         self.lastX = None
