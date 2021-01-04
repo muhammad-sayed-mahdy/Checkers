@@ -3,7 +3,7 @@
 Game of [checkers](https://en.wikipedia.org/wiki/Draughts), with alpha-beta pruning playing agent
 and different evaluation functions
 
-![checkers_game](https://user-images.githubusercontent.com/32793798/103156614-faa80c00-47b2-11eb-9f83-0f5ea874235d.gif)
+![checkers_game](https://user-images.githubusercontent.com/32793798/103526931-411ff980-4e8a-11eb-9b85-3313550e9542.gif)
 
 ## How to run
 You must have python3 installed.  

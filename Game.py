@@ -89,7 +89,7 @@ class GUI:
             for j in range(self.game.size):
 
                 if f:
-                    self.btn[i][j]['bg'] = 'gray25'
+                    self.btn[i][j]['bg'] = 'gray30'
                 else:
                     self.btn[i][j]['bg'] = 'white'
                 img = blank_img
