@@ -24,7 +24,7 @@ for i in range(games):
         evaluator1 = Checkers.evaluate1
         evaluator2 = Checkers.evaluate2
         if cnt > 25:
-            evaluator1 = evaluator2 = Checkers.sumDistances
+            evaluator1 = evaluator2 = Checkers.endGame
 
         if player == START_PLAYER:
             cont, reset = game.minimaxPlay(player, maxDepth=3, evaluate=evaluator1, enablePrint=False)

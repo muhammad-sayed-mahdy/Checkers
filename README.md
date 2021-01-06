@@ -29,4 +29,6 @@ Refer to the [Report](Checkers%20Report.pdf) for more information about experime
 4. You can change the algorithm used to play a computer move, it can be either `Algorithm.MINIMAX` or `Algorithm.RANDOM` (minimax is much harder).
 ### Minimax configuration
 1. You can change the `maxDepth`, the higher the max depth the harder the level of play and the more time it takes to compute the play.
-2. You can change the evaluation function, it can be either `Checkers.evaluate1`, `Checkers.evaluate2` or `Checkers.sumDistances`
+2. You can change the evaluation function, it can be either `Checkers.evaluate1`, `Checkers.evaluate2` or `Checkers.endGame`.
+   -  `evaluate2` is harder than `evaluate1`
+   -  `endGame` is used at the end of the game, when there is no much pieces on the board, it's good for traping and escaping

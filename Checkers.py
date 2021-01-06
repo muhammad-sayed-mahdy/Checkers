@@ -1,3 +1,4 @@
+from collections import Counter
 import random
 from typing import Callable, List, Tuple
 from copy import deepcopy
@@ -51,6 +52,8 @@ class Checkers(object):
                     l.append(0)
                 f = not f
             self.board.append(l)
+
+        self.stateCounter = Counter()
 
     def printBoard(self, x: int = None, y: int = None):
         """Print the game board in stdout, the given position is printed in green
@@ -289,7 +292,7 @@ class Checkers(object):
         Returns:
             int: score of the board
         """
-        # score = (2*maximizer_kings+maximizer_men - (2*opponent_kings + opponent_men))*5
+        # score = (2*maximizer_kings+maximizer_men - (2*opponent_kings + opponent_men))*1000
         
         score = 0
         for i in range(self.size):
@@ -299,10 +302,23 @@ class Checkers(object):
                         score += (self.board[i][j] + 1) // 2
                     else:
                         score -= (self.board[i][j] + 1) // 2
-        return score * 5
+        return score * 1000
 
-    def sumDistances(self, maximizer: int) -> int:
-        """evaluate the current state of the board based on the sum of the distances
+    def cellContains(self, x: int, y: int, player: int) -> bool:
+        """return if cell at (x, y) contains player
+
+        Args:
+            x (int): x position of cell
+            y (int): y position of cell
+            player (int): type of player (WHITE/BLACK)
+
+        Returns:
+            bool: if cell at (x, y) contains player
+        """
+        return self.board[x][y] != 0 and self.board[x][y] % 2 == player
+
+    def endGame(self, maximizer: int) -> int:
+        """evaluate the current state of the board based on end game strategies
             between maximizer player and the opponent
 
         Args:
@@ -328,9 +344,17 @@ class Checkers(object):
                     else:
                         minPieces += 1
                         score1 -= (self.board[i][j] + 1) // 2
-                        
+
+        # penalize if the minimizer is in the corner to be able to trap him at the end of the game                   
+        minimizer = 1 - maximizer
+        penalty = 0
+        if self.cellContains(0, 1, minimizer) or self.cellContains(1, 0, minimizer) \
+            or self.cellContains(self.size-1, self.size-2, minimizer) \
+            or self.cellContains(self.size-2, self.size-1, minimizer):
+            penalty = 1
+
         if maxPieces > minPieces:   #come closer to opponent
-            return score1*1000 - score2
+            return score1*1000 - score2 - penalty*5
         else:    # run away
             return score1*1000 + score2
 
@@ -387,6 +411,30 @@ class Checkers(object):
                 
         return men*2000 + kings*4000 + backRow*400 + middleBox*250 + middleRow*50 - 300*vulnerable + 300*protected
 
+    def stateValue(self, maximizer: int) -> int:
+        """get value of the board state,
+        when the maximizer's pieces is greater than the minimizer's, 
+        penalize repeating the same state
+
+        Args:
+            maximizer (int): the type of the maximizer player (WHIET/BLACK)
+
+        Returns:
+            int: value of the board state
+        """
+        maxPieces = 0
+        minPieces = 0
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.board[i][j] != 0:
+                    if self.board[i][j] % 2 == maximizer:
+                        maxPieces += 1
+                    else:
+                        minPieces += 1
+        if (maxPieces > minPieces):
+            return -self.stateCounter[self.encodeBoard()]
+        return 0
+
     def minimax(
         self,
         player: int,
@@ -418,6 +466,9 @@ class Checkers(object):
             moves = self.nextMoves(player)
         if len(moves) == 0 or depth == maxDepth:
             score = evaluate(self, maximizer)
+            # if there is no escape from losing, maximize number of moves to lose
+            if score < 0:
+                score += depth
             return score
 
         bestValue = -self.OO
@@ -507,6 +558,8 @@ class Checkers(object):
                 print(("WHITE" if player == self.BLACK else "BLACK") + " Player wins")
             return False, False
 
+        self.stateCounter[self.encodeBoard()] += 1
+
         random.shuffle(moves)
         bestValue = -self.OO
         bestMove = None
@@ -516,6 +569,7 @@ class Checkers(object):
             for nx, ny in position[1]:
                 _, removed, promoted = self.playMove(x, y, nx, ny)
                 value = self.minimax(1 - player, player, maxDepth=maxDepth, evaluate=evaluate)
+                value += self.stateValue(player)
                 self.undoMove(x, y, nx, ny, removed, promoted)
                 if value > bestValue:
                     bestValue = value
@@ -533,5 +587,6 @@ class Checkers(object):
             if len(captures) != 0:
                 self.minimaxPlay(player, [((nx, ny), captures)], maxDepth, evaluate, enablePrint)
 
+        self.stateCounter[self.encodeBoard()] += 1
         reset = removed != 0
         return True, reset

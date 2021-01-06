@@ -174,8 +174,8 @@ class GUI:
             cont, reset = True, False
             if USED_ALGORITHM == Algorithm.MINIMAX:
                 evaluate = EVALUATION_FUNCTION
-                if self.cnt > 25:
-                    evaluate = Checkers.sumDistances
+                if self.cnt > 20:
+                    evaluate = Checkers.endGame
                 cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=evaluate, enablePrint=False)
             elif USED_ALGORITHM == Algorithm.RANDOM:
                 cont, reset = self.game.randomPlay(1-self.player, enablePrint=False)
@@ -190,7 +190,7 @@ class GUI:
         else:
             self.player = 1-self.player
 
-        if self.cnt == 100:
+        if self.cnt >= 100:
             messagebox.showinfo(message="Draw!", title="Checkers")
             window.destroy()
             return
