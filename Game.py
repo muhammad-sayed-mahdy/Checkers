@@ -69,9 +69,6 @@ class GUI:
                 self.btn[i][j].bind("<Button-1>", self.click)
                 self.btn[i][j].pack(expand=True, fill=tk.BOTH)
                 
-        self.update()
-        nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
-        self.highlight(nextPositions)
 
         frm_options = tk.Frame(master=window)
         frm_options.pack(expand=True)
@@ -81,6 +78,14 @@ class GUI:
         btn_redo = tk.Button(master=frm_options, command=self.redo, text="Redo")
         btn_redo.pack(side=tk.LEFT, padx=5, pady=5)
 
+        frm_counter = tk.Frame(master=window)
+        frm_counter.pack(expand=True)
+        self.lbl_counter = tk.Label(master=frm_counter)
+        self.lbl_counter.pack()
+
+        self.update()
+        nextPositions = [move[0] for move in self.game.nextMoves(self.player)]
+        self.highlight(nextPositions)
         window.mainloop()
 
     def update(self):
@@ -105,6 +110,7 @@ class GUI:
                 self.btn[i][j]["image"] = img
                 
                 f = not f
+        self.lbl_counter['text'] = f'Moves without capture: {self.cnt}'
         window.update()
     
     def highlight(self, positions: Positions):
