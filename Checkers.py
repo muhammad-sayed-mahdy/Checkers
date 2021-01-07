@@ -331,32 +331,46 @@ class Checkers(object):
         score2 = 0
         maxPieces = 0
         minPieces = 0
+        rowScore = 0
+        base = 0 if maximizer == self.WHITE else self.size-1
+        minimizer = 1 - maximizer
+        minimizerPositions = []
+        for x in range(self.size):
+            for y in range(self.size):
+                if self.cellContains(x, y, minimizer):
+                    minimizerPositions.append((x, y))
+
         for i in range(self.size):
             for j in range(self.size):
                 if self.board[i][j] != 0:
                     if self.board[i][j] % 2 == maximizer:
                         maxPieces += 1
+                        if (self.board[i][j] + 1) // 2 == 1:
+                            rowScore += abs(base-i)
                         score1 += (self.board[i][j] + 1) // 2
-                        for x in range(self.size):
-                            for y in range(self.size):
-                                if self.board[x][y] != 0 and self.board[x][y] % 2 != maximizer:
-                                    score2 += abs(x-i) + abs(y-j)
+                        for x,y in minimizerPositions:
+                            score2 += (x-i)**2 + (y-j)**2
                     else:
                         minPieces += 1
                         score1 -= (self.board[i][j] + 1) // 2
 
         # penalize if the minimizer is in the corner to be able to trap him at the end of the game                   
-        minimizer = 1 - maximizer
-        penalty = 0
-        if self.cellContains(0, 1, minimizer) or self.cellContains(1, 0, minimizer) \
-            or self.cellContains(self.size-1, self.size-2, minimizer) \
-            or self.cellContains(self.size-2, self.size-1, minimizer):
-            penalty = 1
+        minimizerCorner = 0
+        for x, y in minimizerPositions:
+            if (x,y) == (0, 1) or (x,y) == (1, 0) or (x, y) == (self.size-1, self.size-2) \
+                or (x,y) == (self.size-2, self.size-1):
+                minimizerCorner = 1
+
+        maximizerCorner = 0
+        if self.cellContains(0, 1, maximizer) or self.cellContains(1, 0, maximizer) \
+            or self.cellContains(self.size-1, self.size-2, maximizer) \
+            or self.cellContains(self.size-2, self.size-1, maximizer):
+            maximizerCorner = 1
 
         if maxPieces > minPieces:   #come closer to opponent
-            return score1*1000 - score2 - penalty*5
+            return score1*1000 - score2 - minimizerCorner*5 + rowScore*10
         else:    # run away
-            return score1*1000 + score2
+            return score1*1000 + score2 + maximizerCorner*5
 
     def evaluate2(self, maximizer: int) -> int:
         """evaluate the current state of the board
@@ -569,7 +583,7 @@ class Checkers(object):
             for nx, ny in position[1]:
                 _, removed, promoted = self.playMove(x, y, nx, ny)
                 value = self.minimax(1 - player, player, maxDepth=maxDepth, evaluate=evaluate)
-                value += self.stateValue(player)
+                value += 2*self.stateValue(player)  
                 self.undoMove(x, y, nx, ny, removed, promoted)
                 if value > bestValue:
                     bestValue = value

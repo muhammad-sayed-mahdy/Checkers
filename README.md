@@ -32,3 +32,4 @@ Refer to the [Report](Checkers%20Report.pdf) for more information about experime
 2. You can change the evaluation function, it can be either `Checkers.evaluate1`, `Checkers.evaluate2` or `Checkers.endGame`.
    -  `evaluate2` is harder than `evaluate1`
    -  `endGame` is used at the end of the game, when there is no much pieces on the board, it's good for traping and escaping
+3. You can set `INCREASE_DEPTH` to `True` or `False`, if it's true, then at the end of the game the max depth will increase, to be able to search more for a solution.

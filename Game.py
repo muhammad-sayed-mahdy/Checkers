@@ -26,6 +26,7 @@ STARTING_PLAYER = Checkers.BLACK
 USED_ALGORITHM = Algorithm.MINIMAX
 MAX_DEPTH = 5
 EVALUATION_FUNCTION = Checkers.evaluate2
+INCREASE_DEPTH = True
 
 def from_rgb(rgb):
     """translates an rgb tuple of int to a tkinter friendly color code
@@ -41,10 +42,12 @@ class GUI:
         self.history = [self.game.getBoard()]
         self.historyPtr = 0
 
+        self.maxDepth = MAX_DEPTH
+
         self.player = STARTING_PLAYER
         if self.player == Checkers.WHITE and GAME_MODE == Mode.SINGLE_PLAYER:
             if USED_ALGORITHM == Algorithm.MINIMAX:
-                self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=EVALUATION_FUNCTION, enablePrint=False)
+                self.game.minimaxPlay(1-self.player, maxDepth=self.maxDepth, evaluate=EVALUATION_FUNCTION, enablePrint=False)
             elif USED_ALGORITHM == Algorithm.RANDOM:
                 self.game.randomPlay(1-self.player, enablePrint=False)
             self.history = [self.game.getBoard()]
@@ -176,7 +179,9 @@ class GUI:
                 evaluate = EVALUATION_FUNCTION
                 if self.cnt > 20:
                     evaluate = Checkers.endGame
-                cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=MAX_DEPTH, evaluate=evaluate, enablePrint=False)
+                    if INCREASE_DEPTH:
+                        self.maxDepth = 7
+                cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=self.maxDepth, evaluate=evaluate, enablePrint=False)
             elif USED_ALGORITHM == Algorithm.RANDOM:
                 cont, reset = self.game.randomPlay(1-self.player, enablePrint=False)
             self.cnt += 1
