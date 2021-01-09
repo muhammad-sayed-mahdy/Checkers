@@ -181,6 +181,10 @@ class GUI:
                     evaluate = Checkers.endGame
                     if INCREASE_DEPTH:
                         self.maxDepth = 7
+                else:
+                    evaluate = Checkers.evaluate2
+                    self.maxDepth = MAX_DEPTH
+                    
                 cont, reset = self.game.minimaxPlay(1-self.player, maxDepth=self.maxDepth, evaluate=evaluate, enablePrint=False)
             elif USED_ALGORITHM == Algorithm.RANDOM:
                 cont, reset = self.game.randomPlay(1-self.player, enablePrint=False)
